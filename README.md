@@ -4,6 +4,8 @@ Author: Jason Finkle
 
 Contact Information: jfinkle00@gmail.com
 
+Introduction
+
 This project explores predictive modeling for diabetes risk classification using multiple machine learning algorithms, including Random Forest, Logistic Regression, and Support Vector Machines (SVM). The goal is to build interpretable and accurate models to predict diabetes based on patient health indicators such as age, BMI, HbA1c levels, and blood glucose levels.
 
 The repository includes:
