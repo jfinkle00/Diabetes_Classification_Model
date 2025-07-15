@@ -1,0 +1,279 @@
+library(readr)
+library(naniar)
+library(tidyverse)
+library(ggplot2)
+library(gridExtra)
+library(randomForest)
+library(caret)
+library(pROC)
+library(e1071)
+library(tidyr)
+##########################################################################
+
+#Initial Data Cleaning and Exploration
+df <- read_csv("~/Desktop/diabetes_project/diabetes_prediction_dataset.csv")
+
+
+head(df)
+
+
+colnames(df)
+
+
+df %>%
+  select(age, bmi, HbA1c_level, blood_glucose_level) %>%
+  summary()
+
+
+
+# Count missing values per column
+colSums(is.na(df))
+
+# Gender distribution
+table(df$gender)
+
+# Smoking history distribution
+table(df$smoking_history)
+
+# Diabetes prevalence
+table(df$diabetes)
+
+
+
+pairs(df %>% select(age, bmi, HbA1c_level, blood_glucose_level), main = "Pairwise Numeric Variables")
+
+
+# List of numerical variables
+num_vars <- c("age", "bmi", "HbA1c_level", "blood_glucose_level")
+
+
+
+# Create list of histograms
+hist_list <- lapply(num_vars, function(var) {
+  ggplot(df, aes_string(x = var)) +
+    geom_histogram(fill = "steelblue", color = "white", bins = 30) +
+    theme_minimal() +
+    labs(title = paste("Histogram of", var), x = var, y = "Count")
+})
+
+
+
+# Create list of boxplots
+box_list <- lapply(num_vars, function(var) {
+  ggplot(df, aes_string(x = "diabetes", y = var, fill = "diabetes")) +
+    geom_boxplot() +
+    theme_minimal() +
+    labs(title = paste("Boxplot of", var, "by Diabetes Status"),
+         x = "Diabetes", y = var) +
+    theme(legend.position = "none")
+})
+
+
+# Combine histograms
+grid.arrange(grobs = hist_list, ncol = 2, top = "Histograms of Numerical Variables")
+
+# Combine boxplots
+grid.arrange(grobs = box_list, ncol = 2, top = "Boxplots by Diabetes Status")
+
+#Removing observations with no smoking info
+df_clean <- df %>%
+  filter(!smoking_history %in% c("ever", "No Info"))
+
+
+#combining former and not_current
+df_clean <- df_clean %>%
+  mutate(smoking_history = case_when(
+    smoking_history %in% c("not current", "former") ~ "Not_Current",
+    TRUE ~ smoking_history
+  ))
+
+#making the categorical variable smoking into an ordinal variable
+df_clean <- df_clean %>%
+  mutate(smoking_history_factor = case_when(
+    smoking_history == "current" ~ 2,
+    smoking_history == "Not_Current" ~ 1,
+    smoking_history == "never" ~ 0,
+    TRUE ~ NA_real_  # optional: assigns NA to any unexpected category
+  ))
+
+
+#Removing non numeric categories
+df_clean <- df_clean %>%
+  select(where(is.numeric))
+
+# Ensure diabetes is a factor with consistent levels BEFORE splitting
+df_clean <- df_clean %>%
+  mutate(diabetes = factor(diabetes, levels = c(0,1)))
+
+############################################################################
+#Random Forest Model
+set.seed(123)  # for reproducibility
+
+train_index <- createDataPartition(df_clean$diabetes, p = 0.7, list = FALSE)
+
+train_data <- df_clean[train_index, ]
+test_data  <- df_clean[-train_index, ]
+
+
+
+rf_model <- randomForest(
+  diabetes ~ ., 
+  data = train_data, 
+  importance = TRUE,
+  ntree = 100
+)
+
+predictions <- predict(rf_model, newdata = test_data)
+
+
+varImpPlot(rf_model, main = "Random Forest Feature Importance")
+
+cm <- confusionMatrix(predictions, test_data$diabetes)
+cm
+
+# Get predicted probabilities (for class '1' or 'Yes')
+rf_probs <- predict(rf_model, newdata = test_data, type = "prob")[, 2]
+
+
+roc_obj <- roc(test_data$diabetes, rf_probs)
+auc_value <- auc(roc_obj)
+
+# Plot ROC Curve
+plot(roc_obj, col = "blue", main = "ROC Curve for Random Forest Model")
+
+accuracy_rf <- cm$overall["Accuracy"]
+precision_rf <- cm$byClass["Precision"]
+recall_rf <- cm$byClass["Recall"]
+f1_rf <- cm$byClass["F1"]
+
+
+###########################################################################
+
+#Logistic Regression
+
+log_model <- glm(diabetes ~ ., data = train_data, family = binomial)
+
+# Predict probabilities and classes
+log_probs <- predict(log_model, newdata = test_data, type = "response")
+log_pred <- ifelse(log_probs > 0.5, 1, 0)
+log_pred <- factor(log_pred, levels = levels(test_data$diabetes))
+
+# Confusion Matrix
+log_cm <- confusionMatrix(log_pred, test_data$diabetes)
+log_cm
+
+# ROC and AUC
+log_roc <- roc(test_data$diabetes, log_probs)
+log_auc <- auc(log_roc)
+
+accuracy_log <- log_cm$overall["Accuracy"]
+precision_log<- log_cm$byClass["Precision"]
+recall_log <- log_cm$byClass["Recall"]
+f1_log <- log_cm$byClass["F1"]
+
+#############################################################################
+
+#SVM model
+
+# Train SVM
+svm_model <- svm(diabetes ~ ., data = train_data, probability = TRUE)
+
+# Class Predictions
+svm_pred <- predict(svm_model, newdata = test_data)
+
+# Probabilities
+svm_probs <- attr(predict(svm_model, test_data, probability = TRUE), "probabilities")[,2]
+
+# Confusion Matrix
+svm_cm <- confusionMatrix(svm_pred, test_data$diabetes)
+svm_cm
+# ROC and AUC
+svm_roc <- roc(test_data$diabetes, svm_probs)
+svm_auc <- auc(svm_roc)
+
+accuracy_log <- svm_cm$overall["Accuracy"]
+precision_log<- svm_cm$byClass["Precision"]
+recall_log <- svm_cm$byClass["Recall"]
+f1_log <- svm_cm$byClass["F1"]
+
+
+
+############################################################################
+
+#Model Assessment and Comparison
+
+rf_metrics <- data.frame(
+  Model = "Random Forest",
+  Accuracy = round(accuracy, 4),
+  Precision = round(precision, 4),
+  Recall = round(recall, 4),
+  F1_Score = round(f1, 4),
+  AUC = round(auc_value, 4)
+)
+
+log_metrics <- data.frame(
+  Model = "Logistic Regression",
+  Accuracy = round(log_cm$overall["Accuracy"], 4),
+  Precision = round(log_cm$byClass["Precision"], 4),
+  Recall = round(log_cm$byClass["Recall"], 4),
+  F1_Score = round(log_cm$byClass["F1"], 4),
+  AUC = round(log_auc, 4)
+)
+
+svm_metrics <- data.frame(
+  Model = "SVM",
+  Accuracy = round(svm_cm$overall["Accuracy"], 4),
+  Precision = round(svm_cm$byClass["Precision"], 4),
+  Recall = round(svm_cm$byClass["Recall"], 4),
+  F1_Score = round(svm_cm$byClass["F1"], 4),
+  AUC = round(svm_auc, 4)
+)
+
+# Combine with Random Forest metrics
+all_metrics <- bind_rows(rf_metrics, log_metrics, svm_metrics)
+
+
+metrics_long <- all_metrics %>%
+  pivot_longer(cols = c(Accuracy, Precision, Recall, F1_Score, AUC),
+               names_to = "Metric",
+               values_to = "Value")
+
+
+#Metrics Plot
+ggplot(metrics_long, aes(x = Model, y = Value, fill = Model)) +
+  geom_col() +
+  facet_wrap(~Metric, scales = "free_y") +
+  theme_minimal() +
+  labs(title = "Model Metrics Breakdown (Zoomed In)") +
+  coord_cartesian(ylim = c(0.85, 1)) +  # Adjust starting point here
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+##############################################################################
+#Risk Evaluation
+
+
+rf_probs <- predict(rf_model, newdata = test_data, type = "prob")[, 2]
+svm_probs <- attr(predict(svm_model, newdata = test_data, probability = TRUE), "probabilities")[, 2]
+test_data <- test_data %>%
+  mutate(
+    combined_prob = (log_probs + rf_probs + svm_probs) / 3
+  )
+
+test_data <- test_data %>%
+  mutate(
+    combined_risk = case_when(
+      combined_prob <= 0.3 ~ "Low Risk",
+      combined_prob <= 0.6 ~ "Moderate Risk",
+      TRUE ~ "High Risk"
+    )
+  )
+
+ggplot(test_data, aes(x = combined_prob, fill = combined_risk)) +
+  geom_density(alpha = 0.6) +
+  labs(
+    title = "Density Plot of Combined Diabetes Risk",
+    x = "Combined Probability",
+    y = "Density",
+    fill = "Risk Tier"
+  ) +
+  theme_minimal()
+
