@@ -22,6 +22,12 @@ Risk tier classification and visual risk distribution plots
 
 This project is designed as a practical example of end-to-end predictive modeling, suitable for educational, portfolio, or healthcare analytics use cases.
 
+Data set Information
+
+"The Diabetes prediction dataset is a collection of medical and demographic data from patients, along with their diabetes status (positive or negative). The data includes features such as age, gender, body mass index (BMI), hypertension, heart disease, smoking history, HbA1c level, and blood glucose level. This dataset can be used to build machine learning models to predict diabetes in patients based on their medical history and demographic information. This can be useful for healthcare professionals in identifying patients who may be at risk of developing diabetes and in developing personalized treatment plans. Additionally, the dataset can be used by researchers to explore the relationships between various medical and demographic factors and the likelihood of developing diabetes."
+
+Credit to Mohammed Mustafa for uploading the data set to kaggle at https://www.kaggle.com/datasets/iammustafatz/diabetes-prediction-dataset
+
 Initial Data Exploration
 
 For initial data exploration, I analyzed the distribution of numerical variables to identify any potential outliers. I also ensured the dataset contained no missing or duplicate values that could bias the analysis. To enhance interpretability, I transformed the smoking history variable into an ordinal format:
