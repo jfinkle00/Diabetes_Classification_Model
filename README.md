@@ -16,11 +16,8 @@ Random Forest Model Feature Importance Plot and ROC Curve
 
 <img width="420" height="336" alt="image" src="https://github.com/user-attachments/assets/93f372bb-5439-485e-8fd4-30c3dc04bb25" />
 
-Overall Model Comparisons After Training and Testing
+Overall Model Comparisons After Training and Testing and Diabetes Risk Density Plot
 
 <img width="420" height="336" alt="image" src="https://github.com/user-attachments/assets/d5b815ce-e605-4b03-a765-fd1094f35a50" />
-
-
-Diabetes Risk Density Plot
 
 <img width="420" height="336" alt="image" src="https://github.com/user-attachments/assets/d1785aeb-124c-4e72-87ad-942f7965e40d" />
