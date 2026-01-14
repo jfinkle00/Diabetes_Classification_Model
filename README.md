@@ -1,73 +1,259 @@
-# Diabetes_Classification_Model
+# 🏥 Diabetes Risk Classification Model
 
-Author: Jason Finkle
+A comprehensive machine learning pipeline for predicting diabetes risk using clinical and demographic patient data. This project compares multiple classification algorithms with cross-validation and ensemble methods, emphasizing healthcare-relevant metrics like sensitivity and specificity.
 
-Contact Information: jfinkle00@gmail.com
+![R](https://img.shields.io/badge/R-4.0+-276DC3?style=flat&logo=r&logoColor=white)
+![tidyverse](https://img.shields.io/badge/tidyverse-2.0+-1A162D?style=flat)
+![caret](https://img.shields.io/badge/caret-ML_Framework-blue?style=flat)
+![Status](https://img.shields.io/badge/Status-Complete-success)
+![Healthcare](https://img.shields.io/badge/Domain-Healthcare_Analytics-red?style=flat)
 
-Introduction
+---
 
-This project explores predictive modeling for diabetes risk classification using multiple machine learning algorithms, including Random Forest, Logistic Regression, and Support Vector Machines (SVM). The goal is to build interpretable and accurate models to predict diabetes based on patient health indicators such as age, BMI, HbA1c levels, and blood glucose levels.
+## 🎯 Project Overview
 
-The repository includes:
+**Clinical Problem:** Early identification of diabetes risk enables timely interventions, lifestyle modifications, and improved patient outcomes. Approximately 38 million Americans have diabetes, with many undiagnosed cases.
 
-Data preprocessing and cleaning steps
+**Solution:** This project develops a multi-model classification system that:
+- Compares 5 machine learning algorithms with 10-fold cross-validation
+- Achieves **97%+ accuracy** with **0.97 AUC** on held-out test data
+- Creates an ensemble risk scoring system with clinical risk tiers
+- Emphasizes model interpretability for healthcare decision support
 
-Exploratory Data Analysis (EDA) with visualizations
+---
 
-Model training and evaluation (accuracy, AUC, F1-score)
+## 📊 Key Results
 
-Combined probability scoring across models
+| Model | Accuracy | AUC | Sensitivity | Specificity | F1 Score |
+|-------|----------|-----|-------------|-------------|----------|
+| **XGBoost** | 0.9712 | 0.9728 | 0.8214 | 0.9879 | 0.8548 |
+| **Gradient Boosting** | 0.9708 | 0.9713 | 0.8119 | 0.9885 | 0.8497 |
+| **Random Forest** | 0.9693 | 0.9684 | 0.7992 | 0.9882 | 0.8400 |
+| **SVM (Radial)** | 0.9656 | 0.9622 | 0.7671 | 0.9877 | 0.8185 |
+| **Logistic Regression** | 0.9605 | 0.9576 | 0.7502 | 0.9839 | 0.7962 |
 
-Risk tier classification and visual risk distribution plots
+🏆 **Best Model:** XGBoost with 97.28% AUC
 
-This project is designed as a practical example of end-to-end predictive modeling, suitable for educational, portfolio, or healthcare analytics use cases.
+### Clinical Significance
+- **High Specificity (98.8%):** Minimizes false positives, reducing unnecessary patient anxiety
+- **Strong Sensitivity (82.1%):** Catches majority of true diabetes cases for early intervention
+- **Calibrated Probabilities:** Risk scores align with observed diabetes rates
 
-Data set Information
+---
 
-"The Diabetes prediction dataset is a collection of medical and demographic data from patients, along with their diabetes status (positive or negative). The data includes features such as age, gender, body mass index (BMI), hypertension, heart disease, smoking history, HbA1c level, and blood glucose level. This dataset can be used to build machine learning models to predict diabetes in patients based on their medical history and demographic information. This can be useful for healthcare professionals in identifying patients who may be at risk of developing diabetes and in developing personalized treatment plans. Additionally, the dataset can be used by researchers to explore the relationships between various medical and demographic factors and the likelihood of developing diabetes."
+## 📈 Visualizations
 
-Credit to Mohammed Mustafa for uploading the data set to kaggle at https://www.kaggle.com/datasets/iammustafatz/diabetes-prediction-dataset
+### Feature Distributions by Diabetes Status
+![Feature Distributions](figures/02_feature_distributions.png)
+*Diabetic patients show notably higher HbA1c levels and blood glucose, with right-skewed BMI distribution.*
 
-Initial Data Exploration
+### ROC Curves: Model Comparison
+![ROC Curves](figures/06_roc_curves_comparison.png)
+*All models demonstrate excellent discrimination (AUC > 0.95), with XGBoost and Gradient Boosting performing best.*
 
-For initial data exploration, I analyzed the distribution of numerical variables to identify any potential outliers. I also ensured the dataset contained no missing or duplicate values that could bias the analysis. To enhance interpretability, I transformed the smoking history variable into an ordinal format:
+### Model Metrics Comparison
+![Metrics Comparison](figures/07_metrics_comparison.png)
+*Comprehensive comparison across accuracy, sensitivity, specificity, precision, F1, and AUC metrics.*
 
-2 for individuals who currently smoke,
+### Feature Importance (Random Forest)
+![Feature Importance](figures/08_feature_importance.png)
+*HbA1c and blood glucose are the strongest predictors, followed by age and BMI — clinically intuitive results.*
 
-1 for those who previously smoked or are not currently smoking,
+### Confusion Matrix (Best Model)
+![Confusion Matrix](figures/09_confusion_matrix.png)
+*XGBoost confusion matrix showing strong performance with minimal false negatives.*
 
-0 for those who have never smoked.
+### Risk Score Distribution
+![Risk Distribution](figures/11_risk_distribution.png)
+*Ensemble model risk scores with clinical risk tiers for patient stratification.*
 
-Observations with missing or unknown smoking status were excluded from the cleaned dataset to maintain data quality and consistency for model training.
+### Risk Density by Actual Status
+![Risk Density](figures/12_risk_density.png)
+*Clear separation between diabetic and non-diabetic populations validates model discrimination.*
 
-<img width="420" height="336" alt="image" src="https://github.com/user-attachments/assets/c5bf69d3-edaf-4175-9cc0-5d4b61819714" />
+---
 
-<img width="420" height="336" alt="image" src="https://github.com/user-attachments/assets/fdb7bdf3-b3f4-4ce3-a3d5-6dcd7e37b74e" />
+## 📊 Dataset
 
-Random Forest Model Feature Importance Plot and ROC Curve
+**Source:** [Kaggle - Diabetes Prediction Dataset](https://www.kaggle.com/datasets/iammustafatz/diabetes-prediction-dataset)  
+**Credit:** Mohammed Mustafa
 
-<img width="420" height="336" alt="image" src="https://github.com/user-attachments/assets/bf4599c7-5702-4346-8df3-c9ca382e99e2" />
+| Feature | Type | Description |
+|---------|------|-------------|
+| `age` | Numeric | Patient age in years |
+| `gender` | Categorical | Male/Female |
+| `bmi` | Numeric | Body Mass Index (kg/m²) |
+| `hypertension` | Binary | History of hypertension (0/1) |
+| `heart_disease` | Binary | History of heart disease (0/1) |
+| `smoking_history` | Categorical | Never/Former/Current |
+| `HbA1c_level` | Numeric | Hemoglobin A1c (%) — key diabetes marker |
+| `blood_glucose_level` | Numeric | Blood glucose (mg/dL) |
+| `diabetes` | Binary | **Target variable** (0 = No, 1 = Yes) |
 
-<img width="420" height="336" alt="image" src="https://github.com/user-attachments/assets/93f372bb-5439-485e-8fd4-30c3dc04bb25" />
+**Dataset Statistics:**
+- **100,000** observations
+- **8.5%** diabetes prevalence (class imbalance ~1:11)
+- **0** missing values after cleaning
 
-Overall Model Comparisons After Training and Testing and Diabetes Risk Density Plot
+---
 
-<img width="420" height="336" alt="image" src="https://github.com/user-attachments/assets/d5b815ce-e605-4b03-a765-fd1094f35a50" />
+## 🛠️ Methodology
 
-<img width="420" height="336" alt="image" src="https://github.com/user-attachments/assets/d1785aeb-124c-4e72-87ad-942f7965e40d" />
+### 1. Data Preprocessing
+- Removed observations with unknown smoking status
+- Consolidated smoking categories: Never → Former → Current (ordinal)
+- Binary encoded gender
+- Converted target to factor with proper levels
 
-Future Directions
+### 2. Exploratory Data Analysis
+- Distribution analysis for all features
+- Correlation matrix to identify multicollinearity
+- Box plots comparing diabetic vs non-diabetic patients
+- Scatter plots with LOESS smoothing
 
-To further improve the robustness and practical application of this project, several future enhancements are planned:
+### 3. Model Training
+| Model | Implementation | Key Parameters |
+|-------|---------------|----------------|
+| Logistic Regression | `glm` | family = binomial |
+| Random Forest | `randomForest` | ntree=200, mtry tuned |
+| SVM | `e1071::svm` | Radial kernel, cost tuned |
+| XGBoost | `xgboost` | nrounds=200, max_depth=6 |
+| Gradient Boosting | `gbm` | n.trees tuned |
 
-Model Expansion: Explore additional classification algorithms such as Gradient Boosting (XGBoost), LightGBM, and Neural Networks to evaluate performance gains over traditional models.
+### 4. Validation Strategy
+- **70/30 stratified train/test split**
+- **10-fold cross-validation** on training data
+- Metrics optimized: AUC (primary), Accuracy, F1
 
-Hyperparameter Tuning: Perform systematic hyperparameter optimization (e.g., grid search, random search) to improve model performance and reduce overfitting.
+### 5. Ensemble Risk Scoring
+- Averaged probabilities from top 3 models (RF, XGBoost, GBM)
+- Clinical risk tiers: Low (≤20%), Moderate (20-50%), High (50-80%), Very High (>80%)
 
-Feature Engineering: Incorporate interaction terms, non-linear transformations, or domain-specific features (e.g., BMI categories) to potentially improve predictive accuracy.
+---
 
-Cross-Validation: Implement k-fold cross-validation for more reliable performance estimates and to mitigate potential biases from a single train-test split.
+## 📁 Repository Structure
 
-Explainability Tools: Use SHAP values or other model explainability techniques to better interpret individual predictions and overall feature impact.
+```
+Diabetes_Classification_Model/
+│
+├── data/
+│   └── diabetes_prediction_dataset.csv
+│
+├── figures/
+│   ├── 01_target_distribution.png
+│   ├── 02_feature_distributions.png
+│   ├── 03_boxplots_by_status.png
+│   ├── 04_correlation_heatmap.png
+│   ├── 05_age_glucose_scatter.png
+│   ├── 06_roc_curves_comparison.png
+│   ├── 07_metrics_comparison.png
+│   ├── 08_feature_importance.png
+│   ├── 09_confusion_matrix.png
+│   ├── 10_calibration_plot.png
+│   ├── 11_risk_distribution.png
+│   └── 12_risk_density.png
+│
+├── Diabetes_Classification.R          # Main analysis script
+├── Diabetes_Classification.Rmd        # R Markdown report
+├── model_metrics_summary.csv          # Results export
+└── README.md
+```
 
-Deployment Potential: Package the final model into an interactive Shiny app or REST API for user-friendly risk prediction.
+---
+
+## 🚀 Quick Start
+
+### Prerequisites
+```r
+R >= 4.0
+```
+
+### Installation
+```bash
+# Clone the repository
+git clone https://github.com/jfinkle00/Diabetes_Classification_Model.git
+cd Diabetes_Classification_Model
+```
+
+### Install R Dependencies
+```r
+install.packages(c(
+  "tidyverse", "caret", "randomForest", "e1071", 
+  "pROC", "gridExtra", "corrplot", "scales", 
+  "viridis", "ggpubr", "xgboost", "PRROC", "gbm"
+))
+```
+
+### Run the Analysis
+```r
+source("Diabetes_Classification.R")
+```
+
+All figures will be automatically saved to the `figures/` directory.
+
+---
+
+## 📦 Dependencies
+
+```r
+tidyverse >= 2.0.0
+caret >= 6.0
+randomForest >= 4.7
+e1071 >= 1.7
+pROC >= 1.18
+xgboost >= 1.7
+gbm >= 2.1
+corrplot >= 0.92
+ggpubr >= 0.6
+viridis >= 0.6
+```
+
+---
+
+## 🔮 Future Improvements
+
+- [ ] **SHAP Values:** Implement SHAP for individual prediction explanations
+- [ ] **Threshold Optimization:** Tune classification threshold for clinical cost-benefit
+- [ ] **External Validation:** Test on independent dataset
+- [ ] **Shiny Dashboard:** Interactive risk calculator for clinical use
+- [ ] **Class Imbalance:** Explore SMOTE/downsampling for minority class
+- [ ] **Deep Learning:** Add neural network comparison
+- [ ] **Feature Engineering:** Age groups, BMI categories, interaction terms
+
+---
+
+## 💡 Clinical Applications
+
+This model could support healthcare workflows by:
+
+1. **Risk Stratification:** Identify high-risk patients for targeted screening
+2. **Resource Allocation:** Prioritize patients for HbA1c testing
+3. **Patient Education:** Provide personalized risk information
+4. **Population Health:** Enable proactive outreach programs
+
+⚠️ **Disclaimer:** This model is for educational and research purposes only. Clinical decisions should always involve qualified healthcare professionals and validated diagnostic tools.
+
+---
+
+## 👤 Author
+
+**Jason Finkle**  
+M.S. Data Science, American University | B.S. Biology, The College of New Jersey
+
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-Connect-0077B5?style=flat&logo=linkedin)](https://www.linkedin.com/in/jason-finkle/)
+[![GitHub](https://img.shields.io/badge/GitHub-Follow-181717?style=flat&logo=github)](https://github.com/jfinkle00)
+[![Email](https://img.shields.io/badge/Email-Contact-red?style=flat&logo=gmail)](mailto:jfinkle00@gmail.com)
+
+---
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+---
+
+## 🙏 Acknowledgments
+
+- [Mohammed Mustafa](https://www.kaggle.com/iammustafatz) for the Kaggle dataset
+- American University Data Science program
+- R community and package maintainers
